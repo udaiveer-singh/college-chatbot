@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Admin Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; display: flex; justify-content: space-between; align-items: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        .timestamp { color: #666; font-size: 0.9em; width: 150px; }
+        .btn-clear { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 0.8em;}
+        .btn-clear:hover { background: #c82333; }
+        .bot-text { color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        📊 Live Chat Logs
+        <form action="{{ url_for('main.clear_history') }}" method="POST" onsubmit="return confirm('Are you sure? This will delete all logs.');">
+            <button type="submit" class="btn-clear">🗑️ Clear History</button>
+        </form>
+    </h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Time</th>
+                <th>User Question</th>
+                <th>AI Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chat in chats %}
+            <tr>
+                <td>#{{ chat.id }}</td>
+                <td class="timestamp">{{ chat.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ chat.user_message }}</td>
+                <td class="bot-text">{{ chat.bot_response }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align:center; padding: 20px;">No chats recorded yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

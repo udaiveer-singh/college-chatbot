@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Enquiry Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>🎓 College Assistant</h2>
+            <p>Ask me about admissions, courses, or events.</p>
+        </div>
+
+        <div id="chat-box" class="chat-box">
+            <div class="message bot-message">
+                Hello! I am the AI Assistant. How can I help you today?
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your question..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
