@@ -48,7 +48,7 @@ function sendMessage() {
     .then(data => {
         removeLoading(loadingId);
         
-        // Parse Markdown
+        // Parse Markdown (Unified logic)
         let htmlContent = marked.parse(data.response);
         
         // Add Bot Message & Save
@@ -106,7 +106,7 @@ function addMessage(text, sender, isHTML = false, chatId = null, save = true) {
     chatBox.appendChild(wrapper);
     chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
 
-    // --- CRITICAL FIX: SAVE TO STORAGE ---
+    // Save to Storage
     if (save) {
         saveToLocalStorage(text, sender, isHTML);
     }
@@ -219,14 +219,15 @@ function startVoiceInput() {
     };
     recognition.onend = () => { if(micBtn) micBtn.style.color = ""; };
 }
-/* --- Image Upload Logic --- */
+
+/* --- 8. IMAGE UPLOAD LOGIC --- */
 function handleImageUpload() {
     const fileInput = document.getElementById('image-upload');
     const file = fileInput.files[0];
 
     if (file) {
         // Show preview in chat
-        addMessage("📂 Uploading image...", "user");
+        addMessage("📂 Uploading image...", "user", false, null, true);
         
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -251,12 +252,15 @@ function sendImageToBackend(base64Image) {
     .then(res => res.json())
     .then(data => {
         removeLoading(loadingId);
-        let formatted = data.response.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-        addMessage(formatted, "bot", true, data.chat_id, true);
+        
+        // Use Markdown Parser here too!
+        let htmlContent = marked.parse(data.response);
+        addMessage(htmlContent, "bot", true, data.chat_id, true);
+        
         speakText(data.response);
     })
     .catch(err => {
         removeLoading(loadingId);
-        addMessage("Error processing image.", "bot");
+        addMessage("Error processing image.", "bot", false, null, false);
     });
 }
