@@ -13,7 +13,7 @@ if key:
 
 try:
     genai.configure(api_key=key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     response = model.generate_content("Say hello")
     print(f"3. Google Response: {response.text}")
     print("✅ SUCCESS: API Key is working!")

@@ -2,28 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Enquiry Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>JECRC University Assistant</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="light-mode"> 
 
     <div class="chat-container">
-        <div class="chat-header">
-            <h2>🎓 College Assistant</h2>
-            <p>Ask me about admissions, courses, or events.</p>
-        </div>
+        
+        <div class="top-bar">
+            <div class="brand">
+                <div class="logo-box">
+                    <span class="material-icons-round" style="font-size: 24px;">school</span>
+                </div>
+                <div>
+                    <h2>JECRC Assistant</h2>
+                    <p style="display:flex; align-items:center; font-size:12px; color:var(--text-sub);">
+                    {% if maintenance_mode %}
+                        <span class="status-dot offline"></span> 
+                        <span style="color: #ef4444; font-weight: 600;">Maintenance Mode</span>
+                    {% else %}
+                        <span class="status-dot"></span> 
+                        Online Now
+                    {% endif %}
+                </p>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <button onclick="toggleSound()" class="icon-btn" title="Toggle Voice">
+                    <span class="material-icons-round" id="sound-icon" style="color: #94a3b8;">volume_off</span>
+                </button>
+                <button onclick="clearChat()" class="icon-btn" title="Clear Conversation">
+                    <span class="material-icons-round" style="color: #ef4444;">delete_outline</span>
+                </button>
 
-        <div id="chat-box" class="chat-box">
-            <div class="message bot-message">
-                Hello! I am the AI Assistant. How can I help you today?
+                <a href="{{ url_for('main.login') }}" class="icon-btn" title="Admin Dashboard">
+                    <span class="material-icons-round">admin_panel_settings</span>
+                </a>
+                
+                <button onclick="toggleTheme()" class="icon-btn" title="Switch Theme">
+                    <span class="material-icons-round" id="theme-icon">dark_mode</span>
+                </button>
             </div>
         </div>
 
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type your question..." autocomplete="off">
-            <button onclick="sendMessage()">Send</button>
+        <div id="chat-box" class="chat-box">
+            <div class="message-wrapper bot">
+                <div class="avatar">
+                    <span class="material-icons-round">smart_toy</span>
+                </div>
+                <div class="message">
+                    Hello! I am the official AI Assistant for JECRC University. 🎓<br><br>
+                    How can I help you today?
+                </div>
+            </div>
         </div>
+
+        <div class="suggestion-area">
+            <button class="chip" onclick="useSuggestion('💰 Fee Structure')">💰 Fees</button>
+            <button class="chip" onclick="useSuggestion('📅 Admission Dates')">📅 Admissions</button>
+            <button class="chip" onclick="useSuggestion('🏠 Hostel Facilities')">🏠 Hostels</button>
+            <button class="chip" onclick="useSuggestion('🚌 Transport Routes')">🚌 Transport</button>
+            <button class="chip" onclick="useSuggestion('💻 CSE Placements')">💻 Placements</button>
+        </div>
+
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type your question..." autocomplete="off">
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload()">
+                
+                <button onclick="document.getElementById('image-upload').click()" class="icon-btn" title="Upload Marksheet">
+                    <span class="material-icons-round" style="color: #64748b;">attach_file</span>
+                </button>
+                <button onclick="startVoiceInput()" id="mic-btn" class="icon-btn" title="Voice Input">
+                    <span class="material-icons-round">mic</span>
+                </button>
+                
+                <button onclick="sendMessage()" class="send-btn">
+                    <span class="material-icons-round">send</span>
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

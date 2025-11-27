@@ -1,3 +1,5 @@
+import io
+import PIL.Image
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -8,42 +10,84 @@ load_dotenv()
 GEN_AI_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GEN_AI_KEY)
 
-# Using the powerful Flash 2.0 model
+# Initialize Gemini 2.0 Flash
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
 def get_chat_response(user_message):
     try:
-        # 1. Retrieve potential matches from your JECRC PDF
+        # 1. Get facts from your PDF
         context = get_relevant_context(user_message)
         
-        # 2. Construct the "Dual-Brain" Prompt
+        # 2. The Simple Hybrid Prompt
         prompt = f"""
-        You are the official AI Assistant for JECRC University. You have two sources of knowledge:
-        1. The **Context** provided below (Official University Data).
-        2. Your **General Knowledge** (Google Gemini).
-
-        OFFICIAL UNIVERSITY CONTEXT:
+        You are the AI Assistant for JECRC University.
+        
+        RELEVANT INFO FROM DOCUMENTS:
         ---------------------
         {context}
         ---------------------
-
-        USER QUESTION: "{user_message}"
-
-        INSTRUCTIONS:
-        - **Rule 1 (College Queries):** If the user asks about JECRC (Admissions, Fees, Campus, Placements), you MUST derive the answer from the "OFFICIAL UNIVERSITY CONTEXT" above. 
-          - If the specific detail is missing in the context, politely provide the admissions email (admission@jecrcu.edu.in) instead of making up a number.
         
-        - **Rule 2 (General Queries):** If the user asks a general question (e.g., "What is Python?", "Who is Elon Musk?", "Write a poem"), IGNORE the University Context and answer using your General Knowledge. Be helpful and smart.
+        INSTRUCTIONS:
+        1. **College Questions:** If the user asks about JECRC (Fees, Courses, Campus), answer ONLY using the "RELEVANT INFO" above. 
+           - If the answer is missing in the documents, politely say you don't have that info.
+        
+        2. **General Questions:** If the user asks about the world (e.g., "What is Python?", "Who is Elon Musk?"), answer helpfuly using your own general knowledge.
 
-        - **Rule 3 (Identity):** Always maintain a professional, academic tone. Even when answering general questions, act like a helpful university assistant.
-
-        YOUR ANSWER:
+        3. **Admissions:** If the user asks "How to apply?", kindly ask for their Email ID or Phone Number.
+        
+        User Question: "{user_message}"
         """
 
-        # 3. Get the answer
+        # 3. Get Answer
         response = model.generate_content(prompt)
         return response.text.strip()
     
     except Exception as e:
-        print(f"Error communicating with Gemini: {e}")
-        return "I am currently experiencing high traffic. Please try again in a moment."
+        print(f"Error: {e}")
+        return "I'm having trouble connecting right now."
+    
+def generate_summary(user_text, bot_text):
+    """
+    Uses Gemini to create a 1-sentence summary of the conversation.
+    """
+    try:
+        prompt = f"""
+        Summarize the following interaction between a Student and an AI Assistant.
+        
+        Student: "{user_text}"
+        AI: "{bot_text}"
+        
+        INSTRUCTIONS:
+        - Write a concise, professional summary (max 15 words).
+        - Focus on the Student's intent (what they wanted).
+        - Example: "Student asked about B.Tech fees and hostel availability."
+        """
+        
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        return "Summary unavailable."
+
+def get_vision_response(image_bytes):
+    """
+    Analyzes an image using Gemini Pro Vision.
+    """
+    try:
+        # Load the image
+        img = PIL.Image.open(io.BytesIO(image_bytes))
+        
+        prompt = """
+        Analyze this image. It is likely a student's marksheet or document.
+        1. Read the text/numbers visible.
+        2. If it's a marksheet, calculate the approximate percentage.
+        3. Tell the student if they meet the eligibility criteria (Minimum 60% for B.Tech).
+        4. If it's not a document, describe what you see.
+        """
+        
+        # Send Prompt + Image to Gemini
+        response = model.generate_content([prompt, img])
+        return response.text.strip()
+    
+    except Exception as e:
+        print(f"Vision Error: {e}")
+        return "I had trouble analyzing that image. Please ensure it is clear and try again."
