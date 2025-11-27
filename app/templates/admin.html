@@ -247,7 +247,53 @@
                 </tbody>
             </table>
         </div>
-        
+        <div class="table-container" style="margin-bottom: 30px; border-left: 5px solid #3b82f6;">
+            <div class="table-header">
+                <h2 style="color: #2563eb;">📅 Campus Appointments</h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">Date Booked</th>
+                        <th width="20%">Visit Date</th>
+                        <th width="25%">Name & Email</th>
+                        <th width="30%">Purpose</th>
+                        <th width="10%">Action</th> </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td class="timestamp">{{ appt.timestamp.strftime('%b %d, %I:%M %p') }}</td>
+                        <td style="font-weight:bold; color: #1e40af;">{{ appt.visit_date }}</td>
+                        <td>
+                            <b>{{ appt.name }}</b><br>
+                            <span class="timestamp">{{ appt.email }}</span>
+                        </td>
+                        <td>{{ appt.purpose }}</td>
+                        <td>
+                            <form action="{{ url_for('main.delete_appointment', appt_id=appt.id) }}" method="POST" onsubmit="return confirm('Cancel this appointment for {{ appt.name }}?');">
+                                <button type="submit" style="
+                                    background-color: #fee2e2; 
+                                    color: #991b1b; 
+                                    border: none; 
+                                    padding: 6px 10px; 
+                                    border-radius: 6px; 
+                                    cursor: pointer; 
+                                    font-size: 12px; 
+                                    font-weight: 600;">
+                                    Cancel
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:15px;">No appointments scheduled yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <div class="table-container">
             <div class="table-header">
                 <h2>Recent Conversations</h2>

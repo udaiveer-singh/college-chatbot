@@ -1,3 +1,5 @@
+from app.models import ChatHistory, StudentLead, Appointment # <--- Add Appointment
+from flask import render_template, request, jsonify, redirect, url_for, session, flash # <--- Ensure flash is imported
 import base64
 import io
 from PIL import Image
@@ -50,7 +52,7 @@ def chat():
     # 1. Check Maintenance Mode
     global MAINTENANCE_MODE
     if MAINTENANCE_MODE:
-        return jsonify({'response': "⚠️ **System Maintenance:** The chatbot is currently being updated. Please check back in 15 minutes."})
+        return jsonify({'response': "⚠️ **System Maintenance:** The chatbot is currently being updated. Please check back after a while."})
     data = request.get_json()
     user_message = data.get('message', '')
     if not user_message:
@@ -192,6 +194,7 @@ def admin_panel():
     # 1. Fetch Data
     chats = ChatHistory.query.order_by(ChatHistory.timestamp.desc()).all()
     leads = StudentLead.query.order_by(StudentLead.timestamp.desc()).all()
+    appointments = Appointment.query.order_by(Appointment.timestamp.desc()).all()
 
     # 2. Calculate Analytics
     total_chats = ChatHistory.query.count()
@@ -215,6 +218,7 @@ def admin_panel():
                            chats=chats, 
                            leads=leads, 
                            stats=stats, 
+                           appointments=appointments,
                            maintenance_mode=MAINTENANCE_MODE)
 
 @bp.route('/admin/clear', methods=['POST'])
@@ -244,6 +248,42 @@ def clear_leads():
         flash('Error deleting leads.', 'error')
     
     return redirect(url_for('main.admin_panel'))
+@bp.route('/booking', methods=['GET', 'POST'])
+def booking():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        visit_date = request.form.get('visit_date')
+        purpose = request.form.get('purpose')
+
+        if name and email and visit_date:
+            try:
+                # Save Appointment to DB
+                new_appt = Appointment(
+                    name=name,
+                    email=email,
+                    visit_date=visit_date,
+                    purpose=purpose
+                )
+                db.session.add(new_appt)
+                db.session.commit()
+                flash('✅ Appointment booked successfully! We look forward to seeing you.', 'success')
+                
+                # Optional: Send email confirmation to user/admin here
+                return redirect(url_for('main.home'))
+            except Exception as e:
+                print(f"Booking Error: {e}")
+                flash('❌ Error: Could not save appointment. Please check your input.', 'error')
+        else:
+            flash('Please fill out all required fields.', 'error')
+
+    return render_template('booking_form.html')
+
+@bp.route('/admin/appointments')
+@login_required
+def appointments_panel():
+    appointments = Appointment.query.order_by(Appointment.timestamp.desc()).all()
+    return render_template('admin_appointments.html', appointments=appointments)
 @bp.route('/admin/toggle_maintenance', methods=['POST'])
 @login_required
 def toggle_maintenance():
@@ -328,3 +368,24 @@ def summarize_chat_route(chat_id):
         return jsonify({'status': 'success', 'summary': summary})
     
     return jsonify({'error': 'Chat not found'}), 404
+
+@bp.route('/admin/delete_appointment/<int:appt_id>', methods=['POST'])
+@login_required
+def delete_appointment(appt_id):
+    """
+    Cancels (deletes) a specific appointment.
+    """
+    try:
+        appt = Appointment.query.get(appt_id)
+        if appt:
+            db.session.delete(appt)
+            db.session.commit()
+            flash('✅ Appointment cancelled successfully.', 'success')
+        else:
+            flash('❌ Appointment not found.', 'error')
+    except Exception as e:
+        print(f"Error deleting appointment: {e}")
+        db.session.rollback()
+        flash('Error cancelling appointment.', 'error')
+    
+    return redirect(url_for('main.admin_panel'))
