@@ -9,8 +9,8 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Global Toggle Flag
-# CHANGED: Default to False so it works immediately for testing
-IS_TELEGRAM_ACTIVE = False  
+# CHANGED: Default to true so it works immediately for testing
+IS_TELEGRAM_ACTIVE = True  
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Responds to /start command."""
