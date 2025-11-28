@@ -35,7 +35,7 @@ def get_chat_response(user_message):
 
         3. **Appointment Booking (NEW):** If the user asks to **book, schedule, or visit the campus/counselor**, you MUST provide this link: 
            - Link: http://127.0.0.1:5000/booking
-           - Message: "Yes, you can easily book a slot online. Please follow this link to schedule your visit: [ http://127.0.0.1:5000/booking ]"
+           - Message: "Yes, you can easily book a slot online. Please follow this link to schedule your visit: [ http://127.0.0.1:5000/booking or https://college-chatbot-dgba.onrender.com/booking]"
            
         4. **Admissions:** If the user asks "How to apply?", kindly ask for their Email ID or Phone Number.
         

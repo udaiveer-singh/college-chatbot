@@ -66,6 +66,7 @@ def run_telegram_bot():
     print(f"🤖 Telegram Service Initialized (Active: {IS_TELEGRAM_ACTIVE})")
     
     # Run loop (Note: run.py already sets the loop, so we just poll)
+    # application.run_polling(stop_signals=None) for render compatibility
     application.run_polling()
 
 # Helper to toggle status from Routes
